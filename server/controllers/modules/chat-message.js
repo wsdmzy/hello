@@ -1,6 +1,6 @@
 module.exports = {
   'get-history-message': getHistoryMessage,
-  'message': receiveMessage
+  message: receiveMessage,
 };
 
 const MessageModel = require('../../models/message');
@@ -12,37 +12,35 @@ async function getHistoryMessage(query, callback) {
   let condition;
 
   if (isGroup) {
-    let {
-      gid
-    } = query;
+    let { gid } = query;
 
     condition = {
-      to: gid
+      to: gid,
     };
 
     resultArr = await MessageModel.where(condition)
       .sort({
-        time: 'ascending'
+        time: 'ascending',
       }) // descending
       .exec();
   } else {
-    let {
-      uid,
-      friendUid
-    } = query;
+    let { uid, friendUid } = query;
 
-    condition = [{
-      from: uid,
-      to: friendUid
-    }, {
-      from: friendUid,
-      to: uid
-    }];
+    condition = [
+      {
+        from: uid,
+        to: friendUid,
+      },
+      {
+        from: friendUid,
+        to: uid,
+      },
+    ];
 
     resultArr = await MessageModel.where({})
       .or(condition)
       .sort({
-        time: 'ascending'
+        time: 'ascending',
       }) // descending
       .exec();
   }
@@ -53,7 +51,7 @@ async function getHistoryMessage(query, callback) {
   callback({
     code: 0,
     data: resultArr,
-    message: ''
+    message: '',
   });
 }
 
@@ -72,35 +70,33 @@ async function receiveMessage(message, callback) {
   if (isGroup) {
     const gid = message.to;
     const groups = await GroupModel.where({
-        gid
-      })
-      .exec();
+      gid,
+    }).exec();
     const members = groups[0].members;
 
     if (members.length > 1) {
-      members.forEach(el => {
+      members.forEach((el) => {
         const uid = el.uid;
 
         if (uid !== message.from) {
           const toSocketId = userHash[uid];
 
           if (toSocketId) {
-            socket.to(toSocketId)
-              .emit('new-message', message);
+            socket.to(toSocketId).emit('new-message', message);
 
             callback({
               code: 0,
               data: {
                 uuid: message.uuid,
-                time: message.time
+                time: message.time,
               },
-              message: `Message has send to ${uid}`
+              message: `Message has send to ${uid}`,
             });
           } else {
             callback({
               code: 0,
               data: null,
-              message: 'Current user is offline'
+              message: 'Current user is offline',
             });
           }
         }
@@ -108,25 +104,22 @@ async function receiveMessage(message, callback) {
     }
   } else {
     const toSocketId = userHash[message.to];
-
     if (toSocketId) {
       // dispatch message
-      socket.to(toSocketId)
-        .emit('new-message', message);
-
+      socket.to(toSocketId).emit('new-message', message);
       callback({
         code: 0,
         data: {
           uuid: message.uuid,
-          time: message.time
+          time: message.time,
         },
-        message: `Message has send to ${message.to}`
+        message: `Message has send to ${message.to}`,
       });
     } else {
       callback({
         code: 0,
         data: null,
-        message: 'Current user is offline'
+        message: 'Current user is offline',
       });
     }
   }

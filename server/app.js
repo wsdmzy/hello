@@ -11,13 +11,13 @@ const app = new Koa();
 const server = Http.createServer(app.callback());
 const dbConnection = mongoose.connection;
 const io = Socket(server, {
-  origins: '*:*'
+  origins: '*:*',
 });
 
 mongoose.connect('mongodb://106.13.233.32:27017/hello', {
   useNewUrlParser: true,
-  user: "xq",
-  pass: "xq27892789"
+  user: 'xq',
+  pass: 'xq27892789',
 });
 
 dbConnection.on('error', (err) => {
@@ -35,50 +35,44 @@ app.use(koaMount('/upload', koaStatic('./upload')));
 global.$userHash = {};
 global.$sockets = io.sockets.sockets;
 
-let userHash = global.$userHash;
-
-io.on('connection', function(socket) {
+io.on('connection', function (socket) {
   // bind events and handlers
-  Object.keys(controllers)
-    .forEach(module => {
-      Object.keys(controllers[module])
-        .forEach(key => {
-          socket.on(key, controllers[module][key]);
-        });
+  Object.keys(controllers).forEach((module) => {
+    Object.keys(controllers[module]).forEach((key) => {
+      socket.on(key, controllers[module][key]);
     });
-
+  });
   // handle user connect，trigger at login success
-  socket.on('user-connect', function(uid) {
-    userHash[uid] = socket.id;
+  socket.on('user-connect', function (uid) {
+    global.$userHash[uid] = socket.id;
 
     log.success(`\nuser[${uid}] connected`);
-    log.success(JSON.stringify(userHash, null, 2));
+    log.success(JSON.stringify(global.$userHash, null, 2));
   });
 
   // handle user disconnect，trigger at logout success
-  socket.on('user-disconnect', function(uid) {
-    delete userHash[uid];
+  socket.on('user-disconnect', function (uid) {
+    delete global.$userHash[uid];
 
     log.success(`\nuser[${uid}] disconnected`);
-    log.success(JSON.stringify(userHash, null, 2));
+    log.success(JSON.stringify(global.$userHash, null, 2));
   });
 
   // handle unexpected disconnect，such as app process been killed
-  socket.on('disconnect', function() {
+  socket.on('disconnect', function () {
     let uid = '';
 
-    Object.keys(userHash)
-      .find(key => {
-        if (userHash[key] === socket.id) {
-          uid = key;
-          return true;
-        }
-      });
+    Object.keys(global.$userHash).find((key) => {
+      if (global.$userHash[key] === socket.id) {
+        uid = key;
+        return true;
+      }
+    });
 
-    delete userHash[uid];
+    delete global.$userHash[uid];
 
     log.success(`\nuser[${uid}] disconnected`);
-    log.success(JSON.stringify(userHash, null, 2));
+    log.success(JSON.stringify(global.$userHash, null, 2));
   });
 });
 
@@ -88,5 +82,5 @@ app.on('error', (err, ctx) => {
 });
 
 server.listen(3000);
-
+console.log(JSON.stringify(global.$userHash), 'global.$userHash');
 log.success('\nServer: http://localhost:3000');

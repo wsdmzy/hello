@@ -13,8 +13,7 @@
     </div>
 
     <keep-alive>
-      <router-view id="content"
-                   name="contents"></router-view>
+      <router-view id="content" name="contents"></router-view>
     </keep-alive>
   </div>
 </template>
@@ -27,14 +26,13 @@ export default {
   name: 'app',
   components: {
     MenuBar,
-    SearchBar
+    SearchBar,
   },
   data() {
     return {};
   },
   created() {
     this.$socket.emit('user-connect', this.$uid);
-
     this.getUserInfo();
     this.loadRecentChatList();
     this.receiveMessage();
@@ -46,7 +44,7 @@ export default {
         return;
       }
 
-      this.$socket.emit('get-user-info', this.$uid, data => {
+      this.$socket.emit('get-user-info', this.$uid, (data) => {
         this.$store.commit('SET_USERINFO', data);
       });
     },
@@ -61,8 +59,8 @@ export default {
       //   const from = message.from;
       //   console.log(from);
       // });
-    }
-  }
+    },
+  },
 };
 </script>
 

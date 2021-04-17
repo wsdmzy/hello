@@ -1,5 +1,5 @@
 {
-  "name": "hola_client",
+  "name": "hello_client",
   "version": "0.1.0",
   "author": "percy507 <percymong@163.com>",
   "description": "An electron-vue project",
@@ -18,10 +18,11 @@
     "pack:renderer": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.renderer.config.js",
     "test": "npm run unit",
     "unit": "karma start test/unit/karma.conf.js",
-    "postinstall": "npm run lint:fix"
+    "postinstall": "npm run lint:fix",
+    "start": "npm run dev"
   },
   "build": {
-    "productName": "hola",
+    "productName": "hello",
     "appId": "org.simulatedgreg.electron-vue",
     "directories": {
       "output": "build"
